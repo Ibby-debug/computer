@@ -33,6 +33,7 @@ export const TRENDS_KEY_PREFIX = 'trends:'
 export const TRENDS_META_KEY = 'trends:meta'
 export const TRENDS_TTL_SECONDS = 25200 // 7 hours
 export const MAX_HEADLINES = 15
+export const RSS_TOPIC_DELAY_MS = 500
 
 export function trendsKey(topic: TopicId): string {
   return `${TRENDS_KEY_PREFIX}${topic}`

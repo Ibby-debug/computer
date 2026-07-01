@@ -1,4 +1,5 @@
 import {
+  RSS_TOPIC_DELAY_MS,
   RSS_URLS,
   SUPPORTED_TOPICS,
   TRENDS_META_KEY,
@@ -33,25 +34,29 @@ export async function runTrendsPipeline(
   const errors: Record<string, string> = {};
   const payloads: Array<{ topic: TopicId; payload: TrendsPayload }> = [];
 
-  const results = await Promise.allSettled(
-    SUPPORTED_TOPICS.map(async (topic) => {
-      const topicStart = Date.now();
-      try {
-        const payload = await fetchAndSummarizeTopic(env, topic);
-        payloads.push({ topic, payload });
-        console.log(
-          `[trends] ${topic} summarized in ${Date.now() - topicStart}ms`,
-        );
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        errors[topic] = message;
-        console.error(`[trends] ${topic} failed:`, message);
-        throw error;
-      }
-    }),
-  );
+  let succeeded = 0;
 
-  const succeeded = results.filter((r) => r.status === "fulfilled").length;
+  for (let i = 0; i < SUPPORTED_TOPICS.length; i++) {
+    const topic = SUPPORTED_TOPICS[i];
+    const topicStart = Date.now();
+
+    try {
+      const payload = await fetchAndSummarizeTopic(env, topic);
+      payloads.push({ topic, payload });
+      succeeded++;
+      console.log(
+        `[trends] ${topic} summarized in ${Date.now() - topicStart}ms`,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      errors[topic] = message;
+      console.error(`[trends] ${topic} failed:`, message);
+    }
+
+    if (i < SUPPORTED_TOPICS.length - 1) {
+      await new Promise((resolve) => setTimeout(resolve, RSS_TOPIC_DELAY_MS));
+    }
+  }
   let audioErrors = await generateAllTopicAudio(env, payloads);
 
   if (Object.keys(audioErrors).length > 0) {
