@@ -11,7 +11,7 @@ function resolveRequestTopic(request: Request): TopicId {
   return resolveTopic(url.searchParams.get('topic'))
 }
 
-function isAuthorizedRetryRequest(request: Request, env: Env): boolean {
+function isAuthorizedCronRequest(request: Request, env: Env): boolean {
   if (!env.CRON_SECRET) return false
 
   const auth = request.headers.get('Authorization')
@@ -73,12 +73,29 @@ async function handleTrendsReadRequest(request: Request, env: Env): Promise<Resp
   })
 }
 
+async function handleRunPipelineRequest(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+): Promise<Response> {
+  if (request.method !== 'POST') {
+    return Response.json({ error: 'Method not allowed' }, { status: 405 })
+  }
+
+  if (!isAuthorizedCronRequest(request, env)) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  ctx.waitUntil(runTrendsPipeline(env))
+  return Response.json({ status: 'started' }, { status: 202 })
+}
+
 async function handleRetryAudioRequest(request: Request, env: Env): Promise<Response> {
   if (request.method !== 'POST') {
     return Response.json({ error: 'Method not allowed' }, { status: 405 })
   }
 
-  if (!isAuthorizedRetryRequest(request, env)) {
+  if (!isAuthorizedCronRequest(request, env)) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -96,7 +113,7 @@ export default {
     ctx.waitUntil(runTrendsPipeline(env, controller))
   },
 
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url)
 
     if (url.pathname === '/api/trends' && request.method === 'GET') {
@@ -105,6 +122,10 @@ export default {
 
     if (url.pathname === '/api/trends/read' && request.method === 'GET') {
       return handleTrendsReadRequest(request, env)
+    }
+
+    if (url.pathname === '/api/trends/run' && request.method === 'POST') {
+      return handleRunPipelineRequest(request, env, ctx)
     }
 
     if (url.pathname === '/api/trends/retry-audio' && request.method === 'POST') {
