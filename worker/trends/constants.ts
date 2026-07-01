@@ -7,26 +7,19 @@ import {
 
 export { DEFAULT_TOPIC_ID, SUPPORTED_TOPICS, TOPIC_LABELS, type TopicId }
 
+// Google News RSS returns 503 from Cloudflare Workers datacenter IPs.
+// BBC and CoinDesk feeds are bot-friendly and work reliably from Workers.
 export const RSS_URLS: Record<TopicId, string> = {
-  US: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en',
-  GLOBAL:
-    'https://news.google.com/rss/headlines/section/topic/WORLD?hl=en-US&gl=US&ceid=US:en',
-  CRYPTO:
-    'https://news.google.com/rss/search?q=cryptocurrency+bitcoin&hl=en-US&gl=US&ceid=US:en',
-  POLITICS:
-    'https://news.google.com/rss/search?q=politics&hl=en-US&gl=US&ceid=US:en',
-  BUSINESS:
-    'https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=en-US&gl=US&ceid=US:en',
-  TECHNOLOGY:
-    'https://news.google.com/rss/headlines/section/topic/TECHNOLOGY?hl=en-US&gl=US&ceid=US:en',
-  ENTERTAINMENT:
-    'https://news.google.com/rss/headlines/section/topic/ENTERTAINMENT?hl=en-US&gl=US&ceid=US:en',
-  SPORTS:
-    'https://news.google.com/rss/headlines/section/topic/SPORTS?hl=en-US&gl=US&ceid=US:en',
-  SCIENCE:
-    'https://news.google.com/rss/headlines/section/topic/SCIENCE?hl=en-US&gl=US&ceid=US:en',
-  HEALTH:
-    'https://news.google.com/rss/headlines/section/topic/HEALTH?hl=en-US&gl=US&ceid=US:en',
+  US: 'https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml',
+  GLOBAL: 'https://feeds.bbci.co.uk/news/world/rss.xml',
+  CRYPTO: 'https://www.coindesk.com/arc/outboundfeeds/rss',
+  POLITICS: 'https://feeds.bbci.co.uk/news/politics/rss.xml',
+  BUSINESS: 'https://feeds.bbci.co.uk/news/business/rss.xml',
+  TECHNOLOGY: 'https://feeds.bbci.co.uk/news/technology/rss.xml',
+  ENTERTAINMENT: 'https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml',
+  SPORTS: 'https://feeds.bbci.co.uk/sport/rss.xml',
+  SCIENCE: 'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
+  HEALTH: 'https://feeds.bbci.co.uk/news/health/rss.xml',
 }
 
 export const TRENDS_KEY_PREFIX = 'trends:'
