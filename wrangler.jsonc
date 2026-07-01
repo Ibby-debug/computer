@@ -4,7 +4,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "small-disk-ac4f",
+	"name": "ainews",
 	"main": "worker/index.ts",
 	"compatibility_date": "2026-06-26",
 	"build": {
@@ -26,8 +26,7 @@
 	},
 	"kv_namespaces": [
 		{
-			"binding": "TRENDS_KV",
-			"id": "9f7af2c979d2461ba32233cd51ea67b6"
+			"binding": "TRENDS_KV"
 		}
 	],
 	"r2_buckets": [
