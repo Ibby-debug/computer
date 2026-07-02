@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { DEFAULT_SPEAKER_ID, ENABLED_SPEAKERS, type EnabledSpeakerId } from '../../shared/speakers'
 import { HeadlineMarquee } from './HeadlineMarquee'
 import { MediaPlayer } from './MediaPlayer'
+import { SupportFooter } from './SupportFooter'
 import { TopicFilter } from './TopicFilter'
 import { VisualizerOverlay } from './VisualizerOverlay'
 import { useNewsReader } from '../hooks/useNewsReader'
@@ -107,6 +108,8 @@ export function TrendsPanel() {
         </main>
       )}
 
+      <div className="hn__spacer" aria-hidden="true" />
+
       <MediaPlayer
         visible={showPlayer}
         state={reader.state}
@@ -121,6 +124,8 @@ export function TrendsPanel() {
         onSeek={reader.seek}
         onSpeakerChange={handleSpeakerChange}
       />
+
+      <SupportFooter />
     </div>
   )
 }

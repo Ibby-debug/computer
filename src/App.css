@@ -2,6 +2,16 @@
   min-height: 100%;
 }
 
+.hn {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.hn__spacer {
+  flex: 1 1 auto;
+}
+
 .visualizer-overlay {
   position: fixed;
   inset: 0;
@@ -72,7 +82,7 @@
 }
 
 .hn--playing .hn-header,
-.hn--playing .headline-marquee {
+.hn--playing .headline-marquee:not(.support-marquee) {
   opacity: 0.3;
   pointer-events: none;
 }
@@ -210,6 +220,10 @@
   .headline-marquee__content[aria-hidden='true'] {
     display: none;
   }
+
+  .support-marquee .headline-marquee__track {
+    animation: none;
+  }
 }
 
 .hn-main {
@@ -229,6 +243,47 @@
 
 .hn-status--error {
   color: #af0000;
+}
+
+.support-marquee {
+  position: sticky;
+  bottom: 0;
+  z-index: 90;
+  flex-shrink: 0;
+  margin-top: auto;
+  border-bottom: none;
+  border-top: 1px solid #e4e4df;
+  background: #fff;
+}
+
+.support-marquee .headline-marquee__track {
+  animation-duration: 60s;
+}
+
+.support-marquee__icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.support-marquee__label {
+  color: #828282;
+}
+
+.support-marquee__copy {
+  margin-left: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.hn--with-player .media-player {
+  bottom: 48px;
 }
 
 .media-player {
