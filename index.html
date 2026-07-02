@@ -2,11 +2,70 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trending News - TAI News</title>
+    <meta name="description" content="Listen to trending headlines across US, global, crypto, tech, politics, sports, and more. TAI News curates top stories and reads them aloud with AI narrators, updated every few hours." />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#194F82" />
+    <meta name="application-name" content="TAI News" />
+    <meta name="author" content="TAI News" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TAI News" />
+    <meta property="og:title" content="Trending News — TAI News" />
+    <meta property="og:description" content="Listen to trending headlines across US, global, crypto, tech, politics, sports, and more. TAI News curates top stories and reads them aloud with AI narrators, updated every few hours." />
+    <meta property="og:image" content="/logo.svg" />
+    <meta property="og:image:alt" content="TAI News logo" />
+    <meta property="og:locale" content="en_US" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Trending News — TAI News" />
+    <meta name="twitter:description" content="Listen to trending headlines across US, global, crypto, tech, politics, sports, and more. TAI News curates top stories and reads them aloud with AI narrators, updated every few hours." />
+    <meta name="twitter:image" content="/logo.svg" />
+    <meta name="twitter:image:alt" content="TAI News logo" />
+
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="apple-touch-icon" href="/logo.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <title>Trending News — TAI News</title>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "/#website",
+            "name": "TAI News",
+            "description": "Listen to trending headlines across US, global, crypto, tech, politics, sports, and more. TAI News curates top stories and reads them aloud with AI narrators, updated every few hours.",
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "/#app",
+            "name": "TAI News",
+            "description": "Trending news read aloud by AI voices.",
+            "applicationCategory": "NewsApplication",
+            "operatingSystem": "Any",
+            "browserRequirements": "Requires JavaScript",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
+    <noscript>
+      <h1>TAI News</h1>
+      <p>
+        Trending news read aloud by AI voices. Enable JavaScript to browse topics,
+        stream headlines, and listen to narrated news digests.
+      </p>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0d35df97cce24a1f95e6b5acfb96eb12"}'></script><!-- End Cloudflare Web Analytics -->

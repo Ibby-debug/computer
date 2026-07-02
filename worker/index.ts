@@ -1,3 +1,4 @@
+import { SITE_NAME } from '../shared/seo'
 import { resolveSpeaker } from '../shared/speakers'
 import { resolveTopic } from '../shared/topics'
 import { TOPIC_LABELS, SUPPORTED_TOPICS, trendsAudioKey, trendsKey } from './trends/constants'
@@ -149,6 +150,66 @@ export default {
 
     if (url.pathname === '/api/trends/retry-audio' && request.method === 'POST') {
       return handleRetryAudioRequest(request, env)
+    }
+
+    if (url.pathname === '/robots.txt' && request.method === 'GET') {
+      const origin = url.origin
+      return new Response(
+        ['User-agent: *', 'Allow: /', '', `Sitemap: ${origin}/sitemap.xml`].join('\n'),
+        {
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Cache-Control': 'public, max-age=86400',
+          },
+        },
+      )
+    }
+
+    if (url.pathname === '/sitemap.xml' && request.method === 'GET') {
+      const origin = url.origin
+      const lastmod = new Date().toISOString().slice(0, 10)
+      const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${origin}/</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`
+
+      return new Response(sitemap, {
+        headers: {
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600',
+        },
+      })
+    }
+
+    if (url.pathname === '/manifest.webmanifest' && request.method === 'GET') {
+      const origin = url.origin
+      const manifest = {
+        name: SITE_NAME,
+        short_name: SITE_NAME,
+        description: 'Trending news read aloud by AI voices.',
+        start_url: '/',
+        display: 'standalone',
+        background_color: '#f6f6ef',
+        theme_color: '#194F82',
+        icons: [
+          {
+            src: `${origin}/logo.svg`,
+            sizes: 'any',
+            type: 'image/svg+xml',
+          },
+        ],
+      }
+
+      return Response.json(manifest, {
+        headers: {
+          'Cache-Control': 'public, max-age=86400',
+        },
+      })
     }
 
     if (url.pathname.startsWith('/api/')) {

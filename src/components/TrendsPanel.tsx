@@ -5,6 +5,7 @@ import { MediaPlayer } from './MediaPlayer'
 import { SupportFooter } from './SupportFooter'
 import { TopicFilter } from './TopicFilter'
 import { VisualizerOverlay } from './VisualizerOverlay'
+import { useDocumentSeo } from '../hooks/useDocumentSeo'
 import { useNewsReader } from '../hooks/useNewsReader'
 import { formatRelativeTime, TOPIC_LABELS, useTrends } from '../hooks/useTrends'
 import { buildNarrationPreview } from '../utils/buildNarrationPreview'
@@ -12,6 +13,7 @@ import type { TopicId } from '../types/trends'
 
 export function TrendsPanel() {
   const { state, topic, selectTopic } = useTrends()
+  useDocumentSeo(state, topic)
   const reader = useNewsReader()
   const [speakerId, setSpeakerId] = useState<EnabledSpeakerId>(DEFAULT_SPEAKER_ID)
 
@@ -72,6 +74,7 @@ export function TrendsPanel() {
       />
 
       <header className="hn-header">
+        <h1 className="sr-only">TAI News — trending headlines read aloud</h1>
         <TopicFilter activeTopic={topic} onSelect={handleTopicSelect} />
         {updatedAt && (
           <time className="hn-header__updated" dateTime={updatedAt}>
@@ -80,33 +83,35 @@ export function TrendsPanel() {
         )}
       </header>
 
-      <HeadlineMarquee
-        headlines={marqueeHeadlines}
-        sources={marqueeSources}
-        loading={state.status === 'loading'}
-      />
+      <main id="main-content">
+        <HeadlineMarquee
+          headlines={marqueeHeadlines}
+          sources={marqueeSources}
+          loading={state.status === 'loading'}
+        />
 
-      {(state.status === 'unavailable' || state.status === 'error') && (
-        <main className="hn-main">
-          {state.status === 'unavailable' && (
-            <p className="hn-status">
-              {TOPIC_LABELS[state.topic]} trends are not ready yet. Check back after the next update.
-            </p>
-          )}
+        {(state.status === 'unavailable' || state.status === 'error') && (
+          <div className="hn-main">
+            {state.status === 'unavailable' && (
+              <p className="hn-status">
+                {TOPIC_LABELS[state.topic]} trends are not ready yet. Check back after the next update.
+              </p>
+            )}
 
-          {state.status === 'error' && (
-            <p className="hn-status hn-status--error">
-              {state.message}. Try another topic or check back after the next update.
-            </p>
-          )}
-        </main>
-      )}
+            {state.status === 'error' && (
+              <p className="hn-status hn-status--error">
+                {state.message}. Try another topic or check back after the next update.
+              </p>
+            )}
+          </div>
+        )}
 
-      {!canListen && activeTopic && reader.state !== 'idle' && (
-        <main className="hn-main">
-          <p className="hn-status">Select a topic with available trends to listen.</p>
-        </main>
-      )}
+        {!canListen && activeTopic && reader.state !== 'idle' && (
+          <div className="hn-main">
+            <p className="hn-status">Select a topic with available trends to listen.</p>
+          </div>
+        )}
+      </main>
 
       <div className="hn__spacer" aria-hidden="true" />
 
