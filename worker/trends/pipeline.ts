@@ -6,7 +6,7 @@ import {
   TRENDS_TTL_SECONDS,
   trendsKey,
 } from "./constants";
-import { generateAllTopicAudio } from "./generate-audio";
+import { generateTopicAudio } from "./generate-audio";
 import { fetchHeadlines } from "./rss";
 import { retryAudioErrors, retryFailedAudio } from "./retry-audio";
 import { summarizeHeadlines } from "./summarize";
@@ -32,7 +32,7 @@ export async function runTrendsPipeline(
 ): Promise<void> {
   const startTime = Date.now();
   const errors: Record<string, string> = {};
-  const payloads: Array<{ topic: TopicId; payload: TrendsPayload }> = [];
+  let audioErrors: Record<string, string> = {};
 
   let succeeded = 0;
 
@@ -42,11 +42,13 @@ export async function runTrendsPipeline(
 
     try {
       const payload = await fetchAndSummarizeTopic(env, topic);
-      payloads.push({ topic, payload });
       succeeded++;
       console.log(
         `[trends] ${topic} summarized in ${Date.now() - topicStart}ms`,
       );
+
+      const topicAudioErrors = await generateTopicAudio(env, topic, payload);
+      Object.assign(audioErrors, topicAudioErrors);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       errors[topic] = message;
@@ -57,7 +59,6 @@ export async function runTrendsPipeline(
       await new Promise((resolve) => setTimeout(resolve, RSS_TOPIC_DELAY_MS));
     }
   }
-  let audioErrors = await generateAllTopicAudio(env, payloads);
 
   if (Object.keys(audioErrors).length > 0) {
     const retryResult = await retryAudioErrors(env, audioErrors);

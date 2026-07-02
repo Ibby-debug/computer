@@ -1,6 +1,7 @@
 import { resolveSpeaker } from '../shared/speakers'
 import { resolveTopic } from '../shared/topics'
 import { TOPIC_LABELS, SUPPORTED_TOPICS, trendsAudioKey, trendsKey } from './trends/constants'
+import { generateSingleSpeakerAudio } from './trends/generate-audio'
 import { runAudioRetry, runTrendsPipeline } from './trends/pipeline'
 import type { TopicId, TrendsPayload } from './trends/types'
 
@@ -59,10 +60,28 @@ async function handleTrendsReadRequest(request: Request, env: Env): Promise<Resp
   const topic = resolveRequestTopic(request)
   const url = new URL(request.url)
   const speaker = resolveSpeaker(url.searchParams.get('speaker'))
-  const object = await env.TRENDS_AUDIO.get(trendsAudioKey(topic, speaker.id))
+  const key = trendsAudioKey(topic, speaker.id)
+
+  let object = await env.TRENDS_AUDIO.get(key)
 
   if (!object) {
-    return Response.json({ error: 'Audio not yet available' }, { status: 404 })
+    const cached = await env.TRENDS_KV.get<TrendsPayload>(trendsKey(topic), 'json')
+    if (!cached) {
+      return Response.json({ error: 'Trends not yet available' }, { status: 404 })
+    }
+
+    try {
+      await generateSingleSpeakerAudio(env, topic, speaker, cached)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      console.error(`[trends] on-demand audio failed for ${topic}/${speaker.id}:`, message)
+      return Response.json({ error: message }, { status: 503 })
+    }
+
+    object = await env.TRENDS_AUDIO.get(key)
+    if (!object) {
+      return Response.json({ error: 'Audio generation failed' }, { status: 503 })
+    }
   }
 
   return new Response(object.body, {
