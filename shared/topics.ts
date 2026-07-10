@@ -35,3 +35,8 @@ export function resolveTopic(id: string | null | undefined): TopicId {
   }
   return DEFAULT_TOPIC_ID
 }
+
+export function topicsFrom(topic: TopicId): TopicId[] {
+  const index = SUPPORTED_TOPICS.indexOf(topic)
+  return SUPPORTED_TOPICS.slice(index)
+}

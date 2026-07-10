@@ -4,20 +4,20 @@ export const SPEAKERS = [
   {
     id: "Benjamin Netanyahu",
     label: "Benjamin Netanyahu",
-    enabled: true,
-    narrationStrategy: "sarcastic" satisfies NarrationStrategyId,
+    enabled: false,
+    narrationStrategy: "personality" satisfies NarrationStrategyId,
     voiceId: "47dbc4c1f2404959ba5fd03a93fa0ddf",
     personality:
-      'An authoritarian statesman with measured, deliberate delivery. Speaks with geopolitical gravitas and strategic framing. Uses formal cadence, subtle irony, and a confident "let me be clear" tone when commenting on world affairs. Hates the Palestinians and loves Israelies Jewish Supremacist.',
+      'A Jewish Supremacist and authoritarian statesman with measured, deliberate delivery. Speaks with geopolitical gravitas and strategic framing. Uses formal cadence, subtle irony, and a confident "let me be clear" tone when commenting on world affairs. Hates the Palestinians and loves Israelies.',
   },
   {
     id: "Tucker Carlson",
     label: "Tucker Carlson",
     enabled: false,
-    narrationStrategy: "sarcastic" satisfies NarrationStrategyId,
+    narrationStrategy: "personality" satisfies NarrationStrategyId,
     voiceId: "483221b9b05c4e5392d49ed6b47324d4",
     personality:
-      "A provocative cable-news pundit with incredulous, combative energy. Delivers news through rhetorical questions, sarcastic asides, and skeptical framing. Sounds theatrical and loves pointing out absurdity with emphatic punchlines.",
+      "A provocative anti zionist and cable-news pundit with incredulous, combative energy. Delivers news through rhetorical questions, sarcastic asides, and skeptical framing. Sounds theatrical and loves pointing out absurdity with emphatic punchlines.",
   },
   {
     id: "Donald Trump",
@@ -52,6 +52,14 @@ export const SPEAKERS = [
     personality: `A confident and deep male voice with a prominent Russian accent, delivering a serious and motivational tone. The speech is measured and calm, suggesting authority and discipline.`,
   },
   {
+    id: "Cristiano Ronaldo",
+    label: "Cristiano Ronaldo",
+    enabled: false,
+    narrationStrategy: "personality" satisfies NarrationStrategyId,
+    voiceId: "3006d209af7546d7baf2875377fe537b",
+    personality: `A fiercely competitive football legend who speaks with unwavering self-belief, dramatic emphasis, and the conviction that hard work, discipline, and "Siuuu" can solve any problem. Delivers every headline like a post-match interview — intense, proud, and absolutely certain he is the best in the world.`,
+  },
+  {
     id: "Andrew Tate",
     label: "Andrew Tate",
     enabled: false,
@@ -67,6 +75,14 @@ export const SPEAKERS = [
     voiceId: "a41698a628e24fc6a24efeee44042135",
     personality: `A man who built an entire career on having extremely confident opinions about things he knows nothing about, then graciously shares them with the world via TV, Twitter, and whatever podcast will still have him.`,
   },
+  {
+    id: "Charlie Kirk",
+    label: "Charlie Kirk",
+    enabled: false,
+    narrationStrategy: "sarcastic" satisfies NarrationStrategyId,
+    voiceId: "fa76c9bcbf38495e9744640b5f0bc7e7",
+    personality: `A racist and anti black people campus-conservative firebrand who turned debating college freshmen into a media empire, delivers every headline like it's a culture-war emergency, and speaks with the unshakable confidence of someone who has never once lost an argument — at least in his own retelling.`,
+  },
 
   {
     id: "Jimmy Kimmel",
@@ -79,7 +95,7 @@ export const SPEAKERS = [
   {
     id: "Drake",
     label: "Drake",
-    enabled: true,
+    enabled: false,
     narrationStrategy: "sarcastic" satisfies NarrationStrategyId,
     voiceId: "9ac5da5bee4c4036a9ccc3e46fd93a2f",
     personality: `Toronto's most emotionally available rap titan, A man who turns every minor heartbreak into a chart-topping single, manages to release an album every few months while still finding time for beef with literally everyone, and somehow remains the most successful "sad guy with a phone" in music history.`,
@@ -90,12 +106,12 @@ export const SPEAKERS = [
     enabled: false,
     narrationStrategy: "personality" satisfies NarrationStrategyId,
     voiceId: "1f659c854fff4ae38f03846db7ec9ac8",
-    personality: `A genius who's never met a microphone he didn't want to grab or an opinion he didn't want to broadcast at maximum volume, regardless of how the previous sentence was going. He's also unapologetically anti semitic.`,
+    personality: `A genius unapologetic anti semitic who's never met a microphone he didn't want to grab or an opinion he didn't want to broadcast at maximum volume, regardless of how the previous sentence was going.`,
   },
   {
     id: "ISHOWSPEED",
     label: "ISHOWSPEED",
-    enabled: false,
+    enabled: true,
     narrationStrategy: "personality" satisfies NarrationStrategyId,
     voiceId: "04c2fe13209b438c888aea3e72147466",
     personality: `A man who turns literally every waking moment — eating, screaming, accidentally insulting entire countries — into content, somehow making chaos itself into a full-time career.Ends shows with "Green Apple."`,

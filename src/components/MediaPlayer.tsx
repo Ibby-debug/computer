@@ -21,7 +21,12 @@ type MediaPlayerProps = {
   errorMessage: string | null
   currentTime: number
   duration: number
+  playlistActive: boolean
+  canSkipPrevious: boolean
   onPlayPause: () => void
+  onPlayAll: () => void
+  onSkipPrevious: () => void
+  onSkipNext: () => void
   onStop: () => void
   onSeek: (time: number) => void
   onSpeakerChange: (speakerId: EnabledSpeakerId) => void
@@ -36,7 +41,12 @@ export function MediaPlayer({
   errorMessage,
   currentTime,
   duration,
+  playlistActive,
+  canSkipPrevious,
   onPlayPause,
+  onPlayAll,
+  onSkipPrevious,
+  onSkipNext,
   onStop,
   onSeek,
   onSpeakerChange,
@@ -161,6 +171,43 @@ export function MediaPlayer({
       >
         {state === 'loading' ? '…' : state === 'playing' ? '❚❚' : '▶'}
       </button>
+
+      {!playlistActive && (
+        <button
+          type="button"
+          className="media-player__btn media-player__btn--play-all"
+          onClick={onPlayAll}
+          disabled={state === 'loading'}
+          aria-label="Play all topics"
+          title="Play all topics"
+        >
+          ▶▶
+        </button>
+      )}
+
+      {playlistActive && (
+        <>
+          <button
+            type="button"
+            className="media-player__btn media-player__btn--skip"
+            onClick={onSkipPrevious}
+            disabled={!canSkipPrevious}
+            aria-label="Previous topic"
+            title="Previous topic"
+          >
+            ⏮
+          </button>
+          <button
+            type="button"
+            className="media-player__btn media-player__btn--skip"
+            onClick={onSkipNext}
+            aria-label="Skip to next topic"
+            title="Skip to next topic"
+          >
+            ⏭
+          </button>
+        </>
+      )}
 
       <div className="media-player__body">
         <div className="media-player__info">

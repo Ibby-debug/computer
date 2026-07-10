@@ -18,11 +18,19 @@ export function useNewsReader() {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null)
+  const [playlistActive, setPlaylistActive] = useState(false)
+  const [playlistIndex, setPlaylistIndex] = useState(0)
+  const [playlistTotal, setPlaylistTotal] = useState(0)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const objectUrlRef = useRef<string | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
+  const queueRef = useRef<TopicId[]>([])
+  const speakerRef = useRef<SpeakerId | null>(null)
+  const onAdvanceRef = useRef<((next: TopicId) => void) | null>(null)
+  const playlistIndexRef = useRef(0)
+  const playGenerationRef = useRef(0)
 
   const syncProgress = useCallback((audio: HTMLAudioElement) => {
     setCurrentTime(audio.currentTime)
@@ -55,6 +63,16 @@ export function useNewsReader() {
     setDuration(0)
   }, [teardownAudioGraph])
 
+  const clearPlaylist = useCallback(() => {
+    queueRef.current = []
+    speakerRef.current = null
+    onAdvanceRef.current = null
+    playlistIndexRef.current = 0
+    setPlaylistActive(false)
+    setPlaylistIndex(0)
+    setPlaylistTotal(0)
+  }, [])
+
   const ensureAudioContext = useCallback(async () => {
     if (!audioContextRef.current) {
       audioContextRef.current = new AudioContext()
@@ -83,10 +101,12 @@ export function useNewsReader() {
   )
 
   const stop = useCallback(() => {
+    playGenerationRef.current += 1
     cleanup()
+    clearPlaylist()
     setState('idle')
     setErrorMessage(null)
-  }, [cleanup])
+  }, [cleanup, clearPlaylist])
 
   const pause = useCallback(() => {
     if (audioRef.current && state === 'playing') {
@@ -116,9 +136,58 @@ export function useNewsReader() {
     syncProgress(audio)
   }, [syncProgress])
 
-  const play = useCallback(
-    async (topic: TopicId, speakerId: SpeakerId) => {
-      stop()
+  const advancePlaylist = useCallback(() => {
+    const queue = queueRef.current
+    const nextIndex = playlistIndexRef.current + 1
+
+    if (nextIndex >= queue.length) {
+      cleanup()
+      clearPlaylist()
+      setState('idle')
+      return
+    }
+
+    playlistIndexRef.current = nextIndex
+    setPlaylistIndex(nextIndex)
+    const nextTopic = queue[nextIndex]
+    onAdvanceRef.current?.(nextTopic)
+  }, [cleanup, clearPlaylist])
+
+  const retreatPlaylist = useCallback(() => {
+    const queue = queueRef.current
+    const prevIndex = playlistIndexRef.current - 1
+
+    if (prevIndex < 0) return
+
+    playlistIndexRef.current = prevIndex
+    setPlaylistIndex(prevIndex)
+    const prevTopic = queue[prevIndex]
+    onAdvanceRef.current?.(prevTopic)
+  }, [])
+
+  const skipToNext = useCallback(() => {
+    if (queueRef.current.length === 0) return
+    playGenerationRef.current += 1
+    cleanup()
+    advancePlaylist()
+  }, [cleanup, advancePlaylist])
+
+  const skipToPrevious = useCallback(() => {
+    if (queueRef.current.length === 0) return
+    if (playlistIndexRef.current <= 0) return
+    playGenerationRef.current += 1
+    cleanup()
+    retreatPlaylist()
+  }, [cleanup, retreatPlaylist])
+
+  const playTrack = useCallback(
+    async (topic: TopicId, speakerId: SpeakerId, options?: { preservePlaylist?: boolean }) => {
+      if (!options?.preservePlaylist) {
+        clearPlaylist()
+      }
+
+      const generation = playGenerationRef.current
+      cleanup()
       setState('loading')
       setErrorMessage(null)
 
@@ -126,6 +195,8 @@ export function useNewsReader() {
         const response = await fetch(
           `/api/trends/read?topic=${topic}&speaker=${encodeURIComponent(speakerId)}`,
         )
+
+        if (generation !== playGenerationRef.current) return
 
         if (!response.ok) {
           let message = 'Could not generate audio'
@@ -138,12 +209,20 @@ export function useNewsReader() {
           if (response.status === 404 && message === 'Audio not yet available') {
             message = 'Voice not ready yet — check back after the next update.'
           }
+
+          if (queueRef.current.length > 0) {
+            advancePlaylist()
+            return
+          }
+
           setState('error')
           setErrorMessage(message)
           return
         }
 
         const blob = await response.blob()
+        if (generation !== playGenerationRef.current) return
+
         const url = URL.createObjectURL(blob)
         objectUrlRef.current = url
 
@@ -153,7 +232,11 @@ export function useNewsReader() {
         audio.ontimeupdate = () => syncProgress(audio)
         audio.onended = () => {
           cleanup()
-          setState('idle')
+          if (queueRef.current.length > 0) {
+            advancePlaylist()
+          } else {
+            setState('idle')
+          }
         }
 
         await connectAudioElement(audio)
@@ -161,11 +244,49 @@ export function useNewsReader() {
         setState('playing')
       } catch {
         cleanup()
+
+        if (queueRef.current.length > 0) {
+          advancePlaylist()
+          return
+        }
+
         setState('error')
         setErrorMessage('Network error while loading audio')
       }
     },
-    [cleanup, connectAudioElement, stop, syncProgress],
+    [advancePlaylist, cleanup, clearPlaylist, connectAudioElement, syncProgress],
+  )
+
+  const play = useCallback(
+    async (topic: TopicId, speakerId: SpeakerId) => {
+      if (queueRef.current.length > 0) {
+        await playTrack(topic, speakerId, { preservePlaylist: true })
+        return
+      }
+      await playTrack(topic, speakerId)
+    },
+    [playTrack],
+  )
+
+  const playQueue = useCallback(
+    (
+      topics: TopicId[],
+      speakerId: SpeakerId,
+      onAdvance: (next: TopicId) => void,
+    ) => {
+      if (topics.length === 0) return
+
+      queueRef.current = topics
+      speakerRef.current = speakerId
+      onAdvanceRef.current = onAdvance
+      playlistIndexRef.current = 0
+      setPlaylistActive(true)
+      setPlaylistIndex(0)
+      setPlaylistTotal(topics.length)
+
+      void playTrack(topics[0], speakerId, { preservePlaylist: true })
+    },
+    [playTrack],
   )
 
   useEffect(
@@ -177,5 +298,22 @@ export function useNewsReader() {
     [cleanup],
   )
 
-  return { state, errorMessage, currentTime, duration, analyser, play, pause, resume, stop, seek }
+  return {
+    state,
+    errorMessage,
+    currentTime,
+    duration,
+    analyser,
+    playlistActive,
+    playlistIndex,
+    playlistTotal,
+    play,
+    playQueue,
+    pause,
+    resume,
+    stop,
+    seek,
+    skipToNext,
+    skipToPrevious,
+  }
 }

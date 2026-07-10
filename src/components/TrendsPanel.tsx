@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { DEFAULT_SPEAKER_ID, ENABLED_SPEAKERS, type EnabledSpeakerId } from '../../shared/speakers'
+import { topicsFrom } from '../../shared/topics'
 import { HeadlineMarquee } from './HeadlineMarquee'
 import { MediaPlayer } from './MediaPlayer'
 import { SupportFooter } from './SupportFooter'
@@ -34,15 +35,27 @@ export function TrendsPanel() {
     void reader.play(state.data.topic, speakerId)
   }
 
+  const handlePlayAll = () => {
+    const queue = topicsFrom(activeTopic)
+    if (queue.length === 0) return
+
+    reader.playQueue(queue, speakerId, (nextTopic) => {
+      selectTopic(nextTopic)
+      void reader.play(nextTopic, speakerId)
+    })
+  }
+
   const playerTitle =
     state.status === 'data'
       ? `${TOPIC_LABELS[state.data.topic]} news`
       : `${TOPIC_LABELS[topic]} news`
 
   const playerSubtitle =
-    state.status === 'data'
-      ? buildNarrationPreview(state.data, activeSpeaker)
-      : `${activeSpeaker.label} is ready to read`
+    reader.playlistActive
+      ? `${reader.playlistIndex + 1} of ${reader.playlistTotal} — ${playerTitle}`
+      : state.status === 'data'
+        ? buildNarrationPreview(state.data, activeSpeaker)
+        : `${activeSpeaker.label} is ready to read`
 
   const showPlayer = canListen || reader.state !== 'idle'
   const isPlayingOverlay = reader.state === 'playing' || reader.state === 'paused'
@@ -124,7 +137,12 @@ export function TrendsPanel() {
         errorMessage={reader.errorMessage}
         currentTime={reader.currentTime}
         duration={reader.duration}
+        playlistActive={reader.playlistActive}
+        canSkipPrevious={reader.playlistIndex > 0}
         onPlayPause={handleListen}
+        onPlayAll={handlePlayAll}
+        onSkipPrevious={reader.skipToPrevious}
+        onSkipNext={reader.skipToNext}
         onStop={reader.stop}
         onSeek={reader.seek}
         onSpeakerChange={handleSpeakerChange}
