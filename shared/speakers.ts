@@ -188,7 +188,7 @@ export type SpeakerId = Speaker["id"];
 export const ENABLED_SPEAKERS = SPEAKERS.filter((speaker) => speaker.enabled);
 export type EnabledSpeakerId = (typeof ENABLED_SPEAKERS)[number]["id"];
 
-export const DEFAULT_SPEAKER_ID: EnabledSpeakerId = "Benjamin Netanyahu";
+export const DEFAULT_SPEAKER_ID: EnabledSpeakerId = "ISHOWSPEED";
 
 export function resolveSpeaker(id: string | null | undefined): Speaker {
   const match = ENABLED_SPEAKERS.find((speaker) => speaker.id === id);
