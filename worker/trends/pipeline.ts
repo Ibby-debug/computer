@@ -1,13 +1,12 @@
 import {
-  RSS_TOPIC_DELAY_MS,
-  RSS_URLS,
   SUPPORTED_TOPICS,
+  TOPIC_FETCH_DELAY_MS,
   TRENDS_META_KEY,
   TRENDS_TTL_SECONDS,
   trendsKey,
 } from "./constants";
+import { fetchTopicHeadlines } from "../firecrawl/fetch";
 import { generateTopicAudio } from "./generate-audio";
-import { fetchHeadlines } from "./rss";
 import { retryAudioErrors, retryFailedAudio } from "./retry-audio";
 import { summarizeHeadlines } from "./summarize";
 import type { TopicId, TrendsMeta, TrendsPayload } from "./types";
@@ -16,7 +15,11 @@ export async function fetchAndSummarizeTopic(
   env: Env,
   topic: TopicId,
 ): Promise<TrendsPayload> {
-  const headlines = await fetchHeadlines(RSS_URLS[topic]);
+  if (!env.FIRECRAWL_API_KEY) {
+    throw new Error("Firecrawl not configured");
+  }
+
+  const headlines = await fetchTopicHeadlines(env.FIRECRAWL_API_KEY, topic);
   const payload = await summarizeHeadlines(env, topic, headlines);
 
   await env.TRENDS_KV.put(trendsKey(topic), JSON.stringify(payload), {
@@ -56,7 +59,7 @@ export async function runTrendsPipeline(
     }
 
     if (i < SUPPORTED_TOPICS.length - 1) {
-      await new Promise((resolve) => setTimeout(resolve, RSS_TOPIC_DELAY_MS));
+      await new Promise((resolve) => setTimeout(resolve, TOPIC_FETCH_DELAY_MS));
     }
   }
 
