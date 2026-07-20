@@ -22,7 +22,7 @@
 		"nodejs_compat"
 	],
 	"triggers": {
-		"crons": ["0 */6 * * *", "30 */6 * * *"]
+		"crons": ["0 */6 * * *"]
 	},
 	"kv_namespaces": [
 		{
